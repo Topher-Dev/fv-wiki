@@ -11,8 +11,8 @@ FightView is built on a modern technology stack, leveraging PHP, JavaScript, Pos
 ### Utilities (FV) for Application Admins
 - **Location**: `fv/sbin`
   - `db.sh` 
-      **backup**: Saves a backup of the database location based on config details
-      **load [path]**: Loads a backup database based on path
+      **backup**: Saves a backup of the database .gz, location based on config details
+      **restore [path]**: Loads a backup database based on arg path
       **list**: Lists tables
       **sync**: Downloads all backups from the remote machine to the local
       **reverse_sync**: Uploads all backups from local machine to remote server
