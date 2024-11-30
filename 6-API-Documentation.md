@@ -75,7 +75,8 @@ search_columns=name,description&
 # Magic Parameters
 
 include is a very powerful method for enhancing records with its relations. It leverages the extensive details in our table models for
-building complex queries.
+building complex queries. include values are delimited via comma and the values are referred to as aliases which point to a related table and
+are detailed in the model.
 
 include=author,author_details,category&
 
