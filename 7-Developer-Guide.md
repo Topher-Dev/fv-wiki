@@ -6,7 +6,7 @@ Welcome to the FightView Developer's Guide. This document provides essential inf
 #### Initial Setup Instructions
 
 1. **Get a Fresh Installation of Ubuntu 22.04**
-   - Ensure you're starting with a clean and updated installation of Ubuntu 22.04 to avoid any compatibility issues. If you're setting up a new environment, download the Ubuntu 22.04 LTS image from the official [Ubuntu website](https://ubuntu.com/download/desktop) and follow the installation guide.
+   - Ensure you're starting with a clean and updated installation of Ubuntu (latest) to avoid any compatibility issues. If you're setting up a new environment, download the Ubuntu (latest) LTS image from the official [Ubuntu website](https://ubuntu.com/download/desktop) and follow the installation guide.
    - After installation login as root user, update your system to make sure all the default software is up to date. Open a terminal and run:
      ```bash
      apt update && apt upgrade -y
