@@ -1,111 +1,181 @@
-# FightView API Documentation
+
+RAPID DEVELOPMENT SYSTEM (RDS)
+
+Description: Fundamental overview of RDS's web server API
+
+Author: Topher
+
+# RDS (FightView) API Documentation
 
 ## Overview
-
-The **FightView API** provides centralized access to our extensive database of MMA fighters, fights, events, user profiles, predictions, and related content. It's designed to serve and work in conjunction with the FightView client JS application and aims to be accessible for external developers in the future.
-
-## API Access Point
+The **RDS API** provides powerful, simple and convenient methods for accessing services to support client applications. It
+is built in conjuncture with an Apache2 Web Server and is coded in php with a common Model, View, Controller approach. It's aim is to provide a fundamental data driven modular development path.
 
 All API requests are routed through the following endpoint:
 
-`https://api.fightview.app/arc.php`
+127.0.0.1/api.php?
 
-## Authentication
+Two system parameters are required to engage with the system:
 
-Some resources require a valid **JWT token** for access. Include this token as a URL parameter to authenticate your requests. Public routes are accessible without a token.
+t=person
+or 'table'
 
-**Format:**
-`?token=YOUR_JWT_TOKEN`
+&s=read
+or 'service'
 
-## Request Format
+The spirit of RDS is an unambigious mapping of a relational database table in this example 'person' to a dedicated model and controller. The combination of the table and service is here by defined as a route.
 
-Requests must include parameters specifying the **controller** (the resource you're accessing) and the **service** (the action you're requesting).
+Routes are characterized by either being 'public' or 'private'. public routes can be accessed by anyone on the internet,  private require authentication.
 
-**Format:**
-`?token=YOUR_JWT_TOKEN&controller=RESOURCE_NAME&service=ACTION_NAME`
+If a client successfully authenticates with our RDS service they will recieve JSON Web Token. They can use this to accompany subsuqent requests to access private routes.
 
-## Controllers and Services
+j=abcdefg...
+or 'jwtoken'
 
-### Fighters Controller
+The jwt is a clients access pass, it contains unencrypted basic informations about the clients profile. 
+Like a physical key or access pass it should be safe guarded in thecorrect hands.
 
-- **List Fighters** (Public)
-  - `?controller=fighter&service=read_list`
-  - Retrieves a list of fighters with basic information.
+## REQUEST
 
-- **Get Fighter Details** (Public)
-  - `?controller=fighter&service=read_one&fighter_id=ID`
-  - Retrieves detailed information about a specific fighter.
+eg. I want to retrieve one record that models a specifc person.
 
-### Fights Controller
+https://www.rds.app/api.php?
+    t=person&                   table
+    s=read&                     service
+    j=abcdefg&                  json web token
+    unique_ident=1234567890            unique table row identifier
 
-- **List Fights** (Public)
-  - `?controller=fight&service=read_list`
-  - Retrieves a list of fights.
+# Row Parameters
 
-- **Get Fight Details** (Public)
-  - `?controller=fight&service=read_one&fight_id=ID`
-  - Retrieves detailed information about a specific fight.
+When utilizing basic crud methods, RDS expectes a unique access key - unique_{column_name}. This will be validated by the table model.
 
-### Events Controller
+unique_ident=124124124124124142&
+unique_id=1&
+unique_email=c.mansbridge@live.ca&
 
-- **List Events** (Public)
-  - `?controller=event&service=read_list`
-  - Retrieves a list of MMA events.
+# List Parameters
 
-- **Get Event Details** (Public)
-  - `?controller=event&service=read_one&event_id=ID`
-  - Retrieves detailed information about a specific event.
+To curate lists for CRUD operations, we must declare this intent with list={truthy value}
 
-### Predictions Controller
+list=true&                                 
+## Sorting
 
-- **Get Fight Predictions** (Restricted)
-  - `?controller=prediction&service=fight_prediction&fight_id=ID`
-  - Provides AI-driven predictions for specific fights. Requires authentication.
+sort=first_name|asc,last_name|asc
+## Pagination
+page_number=2&
+page_size=20&
+return_count=true&
+## Filtering
+range_created_at=2024-01-01,2024-01-31&
+filter_status=active&
+filter_price_lt=100&
+search_text=hello&
+search_columns=name,description&
 
-### User Profiles Controller (Restricted)
+# Magic Parameters
 
-- **Get User Profile**
-  - `?controller=user&service=read_one&user_id=ID`
-  - Retrieves the profile of a registered user. Requires authentication.
+include is a very powerful method for enhancing records with its relations. It leverages the extensive details in our table models for
+building complex queries.
 
-- **Update User Profile**
-  - `?controller=user&service=update_one&user_id=ID`
-  - Updates user profile information. Requires authentication.
+include=author,author_details,category&
 
-## Rate Limiting
+Our default view = json. Here the response will be returned in json format with all table fields described in the model.
+custom views out of the box handle the following: 
+    -change the return format to other common forms such as html, csv, xml etc
+    -declare relations to include, aka preset values for the include magic param
+    -filter table or relation columns to specified values.
+if a view is specified the values declared in the view will override any values passed with the magic param include *
 
-The API enforces rate limiting to ensure fair usage. Details about limits and how they are applied are provided upon obtaining an API key.
+view=json&
 
-## Error Handling
+view=person_tree
+    
+    EG.
 
-The API uses app-level error handling to indicate the success or failure of requests. Error messages provide additional context about the issue.
+    $format = "csv"
 
-A status code of 0 indicates a successful request; a status code of non-0 indicates a failed request.
+    $include = [
+        "company" => "*",
+        "departments" => "id,name"
+    ]
 
-## Example Request (List Fighters)
+## RESPONSE
 
-`https://api.fightview.app/arc.php?controller=fighter&service=read_list`
+RDS is a JSON first API and all responses default to this markup style, this synergizes with our ability to deliver deeply nested relational data to a
+base record in a readable easily parsed format. However the view element of the MVC paradigm is intentional left opened ended and flexible within RDS.
 
-## Example Response (List Fighters)
+RDS mirrors the established system convention of providing an exit status of 0 for successful requests. This provides a simple flag for developers to handle the
+binary outcome of a request. In the spirit of 'room to grow' we opt for initializing errors with a status value of 1 for unsuccessful requests, the message field is used as a tool for providing a unique string describing the error.
 
-```json
+#Good request
+
 {
-  "status": 0,
-  "message": "Fighters retrieved",
-  "data": [
-    {
-      "id": "fighter123",
-      "name": "John Doe",
-      "weightClass": "Lightweight",
-      "record": "12-3-0",
-      "country": "USA"
+    "status": 0,                            exit status: 1 or 0                
+    "message": "Read successful",           debug tool
+    "data": {                               request payload
+        "first_name": "topher"
+        ...
     }
-  ]
 }
+
+Verbose error details are maintained on the server for developers, RDS out of the box aims to provide concise client friendly error messages.
+
+#Bad request
+
 {
-  "status": 1001,
-  "message": "The provided value for 'weightClass' is not recognized. Please use one of the predefined weight class values."
-  "guilty_param": "weightClass",
-  "guilty_value": "Super Heavy",
+    "status": 1,                    
+    "message": "Client has insufficent privledges to access this resource"
+    "data": null
 }
+
+## MODEL
+The generation of models are heavily automated in RDS. They are built using a dedicated model_fragment.json file and extensive queried meta data. Once established
+these are cached in memory utilized for every request.
+
+A developer can expect a workflow similar to the following 
+
+#SQL - add a new table
+1) vim db/upgrades/{n}.sql
+
+#BASH - upgrade the database
+2) sbin/version.sh upgrade
+
+#BASH - initialize the model by creating a fragment json file and a decicated controller file
+2) sbin/model create table_name
+
+JSON - utilize the fragment file for role based access, required params, data validation e 
+declaring additional services and relational access extensions (see model docs for details)
+*Specifically designed for developer tuning.
+3) vim {table_name}_fragment.json
+
+#BASH - prints out the complete model, contains extensive details for the table and relations 
+4) sbin/model.sh inspect table_name
+
+PHP - Utilize the dedicated controller file for custom services.
+4) vim {table_name}.php
+
+BASH - Test out of box services.
+5) wget 127.0.0.1?t={table_name}&s=create&first_name=chris
+
+
+## CONTROLLER
+The base contoller file provides services common to all tables. 
+
+examples = create,read,update,delete,form_create,form_update
+
+less web/server/controller.php
+
+Individual table controller files are provided for building custom services. Each service
+requires certain details to be defined in the model such as needed params and  privledges
+
+ls -l web/server/controllers/*
+
+
+## VIEW
+Out of box all matters concerned to views are housed in the view.php file. Here we have the default json view and is a location
+for developers to add custom views directly with PHP. 
+
+
+
+
 
